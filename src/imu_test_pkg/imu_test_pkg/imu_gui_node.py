@@ -51,10 +51,23 @@ class ImuVisualizer(Node):
             cameraTargetPosition=[0, 0, 0.1],
         )
 
+        # 增加按Q退出提示
+        p.addUserDebugText("Press 'q' to quit", [0, 0, 0.3], textColorRGB=[1, 1, 1])
+
     def _simulation_loop(self):
         """背景定時呼叫 stepSimulation()"""
         while self._running and rclpy.ok():
             p.stepSimulation()
+
+            # 檢查鍵盤事件，如果按下q則退出
+            keys = p.getKeyboardEvents()
+            # q鍵的ASCII碼為113
+            if 113 in keys and keys[113] & p.KEY_WAS_TRIGGERED:
+                self.get_logger().info("'q' key pressed, exiting...")
+                self._running = False
+                rclpy.shutdown()
+                return
+
             time.sleep(1.0 / 240.0)  # 240Hz 模擬
 
     def imu_callback(self, msg: Imu):
